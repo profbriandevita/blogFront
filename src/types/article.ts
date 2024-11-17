@@ -7,7 +7,7 @@ export interface Article {
     author: string;
     created_at: string;
     isFavorite : boolean;
-   
+    user_id: number;
   }
 
 
@@ -20,6 +20,8 @@ export interface ArticleContextType {
   loading:boolean;
   createArticle: (newArticle: Partial<Article>) => Promise<{success: boolean, message: string}>
   deleteArticle: (id: number) => Promise<void>
+  fetchFavorites:() => Promise<void>;
+ 
 }
 
 

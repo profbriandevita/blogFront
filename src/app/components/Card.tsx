@@ -1,20 +1,53 @@
 
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowRight, faHeart as fasHeart } from '@fortawesome/free-solid-svg-icons';
+import { faArrowRight, faHeart as fasHeart, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { faHeart as farHeart} from '@fortawesome/free-regular-svg-icons';
 import { CardProps } from '@/types/article';
 import { useAuth } from '@/context/AuthProvider';
 import { useArticles } from '@/context/ArticleProvider';
+import Swal from 'sweetalert2'
+
 
 
 
 const Card: React.FC<CardProps> = ({ id, deleteArticle }) => {
-      const { isAuthenticated} = useAuth()
+      const { isAuthenticated, userId} = useAuth()
       const {articles, toggleFavorite} = useArticles()
       const article = articles.find(article => article.id === id)
-
+      
       if (!article) return null
+    
+
+      const isAuthor = userId === article.user_id;
+  
+      
+   
+    
+
+      const confirmDelete = ( ) => {
+        Swal.fire({
+          title: '¿Estas seguro?',
+          text: '¡No podras revertir esto!',
+          icon: 'warning',
+          showCancelButton:true,
+          confirmButtonColor:'#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Si, borralo!'
+        }).then((result)=> { {
+
+        }
+          if (result.isConfirmed) {
+            deleteArticle(article.id)
+            Swal.fire({
+              title: "Eliminado",
+              text: 'El articulo ha sido eliminado',
+              icon: 'success'
+            })
+          }
+
+        })
+      }
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 relative group">
@@ -31,21 +64,34 @@ const Card: React.FC<CardProps> = ({ id, deleteArticle }) => {
 
       <div className="absolute top-4 right-4 flex space-x-2">
         {isAuthenticated && (
+           <>
+            {isAuthor &&  (
+                 <button
+                 onClick={confirmDelete}
+                 className="bg-white/90 backdrop-blur-sm rounded-full p-2.5 shadow-lg hover:bg-white transition-all duration-300 group"
+               >
+                 <FontAwesomeIcon
+                   icon={faTrash}
+                   className="h-5 w-5 text-red-500 group-hover:scale-110 transition-all duration-300"
+                 />
+               </button>
+            )}
+
             <button
-            onClick={() => toggleFavorite(id)}
-            className="bg-white/90 backdrop-blur-sm rounded-full p-2.5 shadow-lg hover:bg-white transition-all duration-300 group"
+              onClick={() => toggleFavorite(id)}
+              className="bg-white/90 backdrop-blur-sm rounded-full p-2.5 shadow-lg hover:bg-white transition-all duration-300 group"
             >
-            <FontAwesomeIcon
-              icon={article.isFavorite ? fasHeart : farHeart}
-              className={`h-5 w-5 ${
-                article.isFavorite ? 'text-red-500' : 'text-gray-600'
-              } group-hover:scale-110 transition-all duration-300`}
-            />
+              <FontAwesomeIcon
+                icon={article.isFavorite ? fasHeart : farHeart}
+                className={`h-5 w-5 ${
+                  article.isFavorite ? 'text-red-500' : 'text-gray-600'
+                } group-hover:scale-110 transition-all duration-300`}
+              />
             </button>
-        )
-        
-        
-        }
+           
+           
+           </>
+        )}
        
       </div>
 
@@ -62,7 +108,7 @@ const Card: React.FC<CardProps> = ({ id, deleteArticle }) => {
         <p className="text-gray-600 leading-relaxed mb-6">
           {article.content.length > 150 ? `${article.content.slice(0, 150)}...` : article.content}
         </p>
-          <button className='bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline' onClick={()=> deleteArticle(article.id)}>Eliminar</button>
+         
      
         <div className="flex items-center justify-between mt-6 border-t border-gray-100 pt-4">
           <div className="flex items-center space-x-4">

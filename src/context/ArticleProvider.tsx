@@ -55,6 +55,23 @@ export const ArticleProvider: React.FC<{children: React.ReactNode}> = ({children
     }
 
 
+    const fetchFavorites = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/favorites', {
+          method: 'GET',
+           headers: {'Content-Type': 'application/json'},
+          credentials: 'include'
+        })
+
+        if(!response.ok) throw new Error('Fallo la conexion a favorites')
+        const favorites = await response.json()
+      setArticles(favorites)
+      } catch (error) {
+        console.log('Error al hacer el fching de favorites', error)
+      }
+    }
+
+
     const deleteArticle = async (id: number) => {
       try {
         const response = await fetch(`http://localhost:5000/articles/${id}`, {
@@ -131,7 +148,7 @@ export const ArticleProvider: React.FC<{children: React.ReactNode}> = ({children
 
 
       return (
-        <ArticleContext.Provider value={{articles, filteredArticles, setFilteredArticles, toggleFavorite, loading, fetchArticleById,createArticle, deleteArticle}}>
+        <ArticleContext.Provider value={{articles, filteredArticles, setFilteredArticles, toggleFavorite, loading,fetchFavorites, fetchArticleById,createArticle, deleteArticle}}>
             {children}
         </ArticleContext.Provider>
       )

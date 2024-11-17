@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {faPlusCircle, faSignInAlt } from '@fortawesome/free-solid-svg-icons';
+import {faPlusCircle, faSignInAlt, faStar, faUser } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
 import { SearchBar } from './SearchBar';
 import { Article } from '@/types/article';
+import { useArticles } from '@/context/ArticleProvider';
+import { useAuth } from '@/context/AuthProvider';
 
   
 
@@ -16,45 +18,10 @@ interface NavbarProps {
 
 
 const Navbar: React.FC<NavbarProps> = ({articles, setFilteredArticles, onOpenCreateModal}) => {
-    
-
-    const [isAuthenticated, setIsAuthenticated] = useState(false)
-
-
-    useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                const response = await fetch('http://localhost:5000/check-auth', {
-                    method: 'GET',
-                    credentials: 'include',
-                })
-                
-                const data = await response.json()
-                console.log(data)
-                setIsAuthenticated(data.authenticated)
-            } catch (error) {
-                console.log('Errr al verificar la autenticacion', error)
-            }
-        }
+    const {fetchFavorites} = useArticles()
+    const {isAuthenticated, logout, username} = useAuth()
 
 
-        checkAuth()
-    },
-      
-    [])
-
-
-    const handleLogout = async () => {
-        try {
-            await fetch('http://localhost:5000/logout', {
-                method: 'POST',
-                credentials: 'include'
-            })
-            setIsAuthenticated(false)
-        } catch (error) {
-            console.log('Error al cerrar sesion', error)
-        }
-    }
 
     return (
         <nav className='bg-indigo-600 text-white p-4'>
@@ -72,12 +39,32 @@ const Navbar: React.FC<NavbarProps> = ({articles, setFilteredArticles, onOpenCre
                         <ul className='flex space-x-6 items-center'>
                             {
                                 isAuthenticated && (
+                              <>
+
+                                {
+                                    username && (
+                                        <li className='flex items-center'>
+                                            <FontAwesomeIcon icon={faUser} className='mr-2 text-lg'/>
+                                            <span className='mr-10 h-6 w-6'>{username}</span>
+                                        </li>
+                                    )
+                                }
+
+                                 <button onClick={fetchFavorites} className='flex items-center hover:text-gray-300'>
+                                    <FontAwesomeIcon icon={faStar} className='mr-2 h-6 w-6'/>
+                                    Favoritos
+                                 </button>
+                                 
                                 <li>
                                     <button onClick={onOpenCreateModal} className='flex items-center hover:text-gray-300'> 
                                     <FontAwesomeIcon icon={faPlusCircle} className='mr-2 h-6 w-6' />
                                     Crear Ariculo
                                     </button>
                                 </li>
+                              
+                              
+                              </>
+
 
                                 ) 
                             }  
@@ -92,7 +79,7 @@ const Navbar: React.FC<NavbarProps> = ({articles, setFilteredArticles, onOpenCre
                              ) : (
                                 <li>
                                     <button
-                                    onClick={handleLogout}
+                                    onClick={logout}
                                     className='flex items-center hover:text-gray-300'> 
                                     <FontAwesomeIcon icon={faSignInAlt} className='mr-2 h-6 w-6' />
                                     Cerrar Sesion
